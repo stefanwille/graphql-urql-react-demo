@@ -6,15 +6,15 @@ import gql from 'graphql-tag';
 import './App.css';
 import { pipe, subscribe } from 'wonka';
 
-const getToken = () => 'abcdefg12345';
+const getAccessToken = () => 'abcdefg12345';
 
 const client = createClient({
   url: 'http://localhost:4000/graphql',
 
   fetchOptions: () => {
-    const token = getToken();
+    const accessToken = getAccessToken();
     return {
-      headers: { authorization: token ? `Bearer ${token}` : '' },
+      headers: { authorization: accessToken ? `Bearer ${accessToken}` : '' },
     };
   },
 });
