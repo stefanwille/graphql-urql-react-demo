@@ -79,31 +79,36 @@ const performQuery = (query) => {
 };
 
 const ImperativeQueryForMe = () => {
-	const [ response, setResponse ] = useState({ fetching: true, data: null, error: null });
+	const [ fetching, setFetching ] = useState(false);
+	const [ error, setError ] = useState(null);
+	const [ data, setData ] = useState(null);
 
 	useEffect(() => {
 		const run = async () => {
+			setFetching(true);
 			try {
 				const data = await performQuery(getMe);
-				setResponse({ data });
+				setData(data);
 			} catch (error) {
-				setResponse({ error });
+				setError(error);
+			} finally {
+				setFetching(false);
 			}
 		};
 		run();
 	}, []);
 
-	if (response.fetching) {
+	if (fetching) {
 		return 'Fetching...';
 	}
 
-	if (response.error) {
+	if (error) {
 		return 'Error...';
 	}
 
 	return (
 		<p>
-			Imperative query via client.executeQuery(): {response.data.me.firstName} {response.data.me.lastName}
+			Imperative query via client.executeQuery(): {data.me.firstName} {data.me.lastName}
 		</p>
 	);
 };
