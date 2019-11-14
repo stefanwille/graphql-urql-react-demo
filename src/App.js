@@ -63,20 +63,37 @@ const HookQueryForMe = () => {
 	);
 };
 
-const ImperativeQueryForMe = () => {
-	const [ response, setResponse ] = useState(null);
-
-	useEffect(() => {
-		const request = createRequest(getMe);
+const performQuery = (query) => {
+	return new Promise((resolve, reject) => {
+		const request = createRequest(query);
 		pipe(
 			client.executeQuery(request),
-			subscribe((currentResponse) => {
-				setResponse(currentResponse);
+			subscribe(({ data, error }) => {
+				if (error) {
+					reject(error);
+				}
+				resolve(data);
 			})
 		);
+	});
+};
+
+const ImperativeQueryForMe = () => {
+	const [ response, setResponse ] = useState({ fetching: true, data: null, error: null });
+
+	useEffect(() => {
+		const run = async () => {
+			try {
+				const data = await performQuery(getMe);
+				setResponse({ data });
+			} catch (error) {
+				setResponse({ error });
+			}
+		};
+		run();
 	}, []);
 
-	if (!response) {
+	if (response.fetching) {
 		return 'Fetching...';
 	}
 
