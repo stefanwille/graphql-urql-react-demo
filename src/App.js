@@ -88,7 +88,10 @@ const ImperativeQueryForMe = () => {
     const run = async () => {
       setFetching(true);
       try {
+        console.log('fetching');
+
         const data = await performQuery(getMe);
+        console.log('data', data);
         setData(data);
       } catch (error) {
         setError(error);
@@ -105,6 +108,10 @@ const ImperativeQueryForMe = () => {
 
   if (error) {
     return 'Error...';
+  }
+
+  if (!data) {
+    return 'No data';
   }
 
   return (
