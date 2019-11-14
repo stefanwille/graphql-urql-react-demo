@@ -30,7 +30,7 @@ const query = gql`
 const queryVariables = {};
 
 const DeclarativeQueryForMe = () => (
-  <Query query={query} variables={{}}>
+  <Query query={query} variables={queryVariables}>
     {({ fetching, data, error, extensions }) => {
       if (fetching) {
         return 'Loading...';
@@ -48,7 +48,7 @@ const DeclarativeQueryForMe = () => (
 );
 
 const HookQueryForMe = () => {
-  const [result] = useQuery({ query: query });
+  const [result] = useQuery({ query: query, variables: queryVariables });
   const { fetching, error, data } = result;
 
   if (fetching) {
