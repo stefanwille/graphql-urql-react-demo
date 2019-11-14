@@ -88,10 +88,6 @@ const ImperativeQueryForMe = () => {
     return 'Error...';
   }
 
-  if (!data) {
-    return 'No data';
-  }
-
   return (
     <p>
       Imperative query via client.executeQuery(): {data.me.firstName}{' '}
