@@ -1,14 +1,11 @@
 import React, { useState, useEffect } from 'react';
 
-import { Provider, createClient, Query, useQuery, createRequest } from 'urql';
+import { Provider, createClient, Query, useQuery } from 'urql';
 import gql from 'graphql-tag';
 
 import './App.css';
-import { pipe, subscribe } from 'wonka';
 
-const getAccessToken = () => 'abcdefg12345';
-
-const client = createClient({
+const urqlClient = createClient({
   url: 'http://localhost:4000/graphql',
 
   fetchOptions: () => {
@@ -19,7 +16,9 @@ const client = createClient({
   },
 });
 
-const getMe = gql`
+const getAccessToken = () => 'abcdefg12345';
+
+const query = gql`
   query GetMe {
     me {
       firstName
@@ -28,8 +27,10 @@ const getMe = gql`
   }
 `;
 
+const queryVariables = {};
+
 const DeclarativeQueryForMe = () => (
-  <Query query={getMe} variables={{}}>
+  <Query query={query} variables={{}}>
     {({ fetching, data, error, extensions }) => {
       if (fetching) {
         return 'Loading...';
@@ -47,7 +48,7 @@ const DeclarativeQueryForMe = () => (
 );
 
 const HookQueryForMe = () => {
-  const [result] = useQuery({ query: getMe });
+  const [result] = useQuery({ query: query });
   const { fetching, error, data } = result;
 
   if (fetching) {
@@ -64,47 +65,24 @@ const HookQueryForMe = () => {
   );
 };
 
-const performQuery = query => {
-  return new Promise((resolve, reject) => {
-    const request = createRequest(query);
-    pipe(
-      client.executeQuery(request),
-      subscribe(({ data, error }) => {
-        if (error) {
-          reject(error);
-        }
-        resolve(data);
-      })
-    );
-  });
-};
-
 const ImperativeQueryForMe = () => {
-  const [fetching, setFetching] = useState(false);
-  const [error, setError] = useState(null);
-  const [data, setData] = useState(null);
+  const [response, setResponse] = useState(null);
 
   useEffect(() => {
     const run = async () => {
-      setFetching(true);
-      try {
-        console.log('fetching');
-
-        const data = await performQuery(getMe);
-        console.log('data', data);
-        setData(data);
-      } catch (error) {
-        setError(error);
-      } finally {
-        setFetching(false);
-      }
+      const response = await urqlClient
+        .query(query, queryVariables)
+        .toPromise();
+      setResponse(response);
     };
     run();
   }, []);
 
-  if (fetching) {
+  if (!response) {
     return 'Fetching...';
   }
+
+  const { data, error } = response;
 
   if (error) {
     return 'Error...';
@@ -124,7 +102,7 @@ const ImperativeQueryForMe = () => {
 
 function App() {
   return (
-    <Provider value={client}>
+    <Provider value={urqlClient}>
       <div className="App">
         <header className="App-header">
           <p>
